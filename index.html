@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>МАПА ШАХЕДІВ</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; font-family: Arial, sans-serif; }
+    #mapContainer { height: 100%; width: 100%; }
+    .logo {
+      position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+      background: rgba(255,255,255,0.95); padding: 6px 18px; border-radius: 20px;
+      font-weight: bold; font-size: 16px; box-shadow: 0 4px 12px rgba(0,0,0,.25);
+      z-index: 1000; transition: opacity 0.3s;
+    }
+    .controls { position: fixed; right: 8px; display: flex; flex-direction: column; gap: 6px; z-index: 1000; }
+    .main-btn {
+      width: 90px; height: 30px; border-radius: 6px; border: none;
+      background: #fff; box-shadow: 0 3px 8px rgba(0,0,0,.25);
+      font-size: 11px; font-weight: bold; cursor: pointer;
+    }
+    .group { display: none; flex-direction: column; gap: 4px; }
+    .sub-btn {
+      width: 90px; height: 28px; border-radius: 6px; border: none;
+      background: #f7f7f7; box-shadow: 0 2px 6px rgba(0,0,0,.2);
+      display: flex; align-items: center; gap: 6px; font-size: 10px;
+      padding-left: 6px; cursor: pointer;
+    }
+    .sub-btn img { width: 18px; height: 18px; object-fit: contain; }
+    .clear-btn { background: #000; color: #fff; margin-top: 5px; }
+  </style>
+</head>
+<body>
+
+<div class="logo" id="logoText">МАПА ШАХЕДІВ</div>
+
+<div id="mapContainer"></div>
+
+<div class="controls" style="top:10px; right:8px; z-index:1001;">
+  <button class="main-btn" id="togglePanelTop" style="width:40px;">А</button>
+</div>
+
+<div class="controls" id="controlsPanel" style="top:50px; right:8px;">
+  <button class="main-btn" onclick="toggleGroup('uav')">БпЛА</button>
+  <div class="group" id="uav">
+    <button class="sub-btn" data-type="shahed"><img src="https://image2url.com/r2/default/images/1769876144192-e893bb54-146e-4d25-8095-795e489ec27b.png"> Shahed</button>
+    <button class="sub-btn" data-type="shahed238"><img src="https://image2url.com/r2/default/images/1769876435714-63e7816c-507f-4deb-a6dd-287a51d84b60.png"> Shahed-238</button>
+    <button class="sub-btn" data-type="supercam"><img src="https://image2url.com/r2/default/images/1770033886657-125ec266-2323-44e6-b2ca-133b9f04f3cd.png"> СуперКам</button>
+    <button class="sub-btn" data-type="unknown_uav"><img src="https://image2url.com/r2/default/images/1770034055392-bc372247-fbcc-4a03-8bc6-58eb021f13a3.png"> Невст БпЛА</button>
+    <button class="sub-btn" data-type="molniya_uav"><img src="https://image2url.com/r2/default/images/1769865931930-f030be05-42e0-4bf3-b6f0-e3a6a30319d7.png"> Молнія</button>
+    <button class="sub-btn" data-type="zala"><img src="https://image2url.com/r2/default/images/1769866607142-afcdd360-ecda-4262-b039-d4bb7969d62f.png"> ZALA</button>
+    <button class="sub-btn" data-type="gerbera"><img src="https://image2url.com/r2/default/images/1769873035628-4f3813ed-c537-43ab-8ef6-166066f3f72f.png"> Гербера</button>
+    <button class="sub-btn" data-type="orlan10"><img src="https://image2url.com/r2/default/images/1769951577213-f1ec5d62-1c46-49ec-a8c7-dc566fd3560d.png"> Орлан-10</button>
+    <button class="sub-btn" data-type="geran2"><img src="https://image2url.com/r2/default/images/1769951597454-ae4251f1-69fc-482b-a4a5-71ffd356c514.png"> Герань-2</button>
+  </div>
+
+  <button class="main-btn" onclick="toggleGroup('missiles')">Ракети</button>
+  <div class="group" id="missiles">
+    <button class="sub-btn" data-type="x101"><img src="https://image2url.com/r2/default/images/1769819258646-298e5b0c-8c6c-4b97-a76f-d8a23787f129.png"> Х-101</button>
+    <button class="sub-btn" data-type="kinzhal"><img src="https://image2url.com/r2/default/images/1769866797824-8cca767c-f89e-4b1b-b26a-7bca6f6a9ba4.png"> Кинжал</button>
+    <button class="sub-btn" data-type="iskander"><img src="https://image2url.com/r2/default/images/1769865857265-6f3cff5b-d796-44d2-ac25-059627b1a816.png"> Іскандер</button>
+    <button class="sub-btn" data-type="kab"><img src="https://image2url.com/r2/default/images/1769870791900-3d52f83c-5625-49d2-af80-25537e5970f5.png"> КАБ</button>
+  </div>
+
+  <button class="main-btn" onclick="toggleGroup('air')">Страт / Авіа</button>
+  <div class="group" id="air">
+    <button class="sub-btn" data-type="tu95ms"><img src="https://image2url.com/r2/default/images/1769873099537-2e989e4a-4e8d-4036-a7d9-e3a14dbe49bf.png"> Ту-95МС</button>
+    <button class="sub-btn" data-type="mig31k"><img src="https://image2url.com/r2/default/images/1769951654301-930849ec-387b-4f4a-9aaa-7d6a7e1c0e37.png"> МИГ-31К</button>
+    <button class="sub-btn" data-type="su34"><img src="https://image2url.com/r2/default/images/1769870812595-347659e8-df22-4f45-8e49-9a6e2a4923b9.png"> СУ-34</button>
+  </div>
+
+  <button class="main-btn clear-btn" id="clearBtn">Очистити</button>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://rawcdn.githack.com/bbecquet/Leaflet.RotatedMarker/master/leaflet.rotatedMarker.js"></script>
+
+<script>
+const map = L.map('mapContainer').setView([48.5, 32.3], 6);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+const icons = {
+  shahed: ['https://image2url.com/r2/default/images/1769876144192-e893bb54-146e-4d25-8095-795e489ec27b.png', 18],
+  shahed238: ['https://image2url.com/r2/default/images/1769876435714-63e7816c-507f-4deb-a6dd-287a51d84b60.png', 22],
+  supercam: ['https://image2url.com/r2/default/images/1770033886657-125ec266-2323-44e6-b2ca-133b9f04f3cd.png', 24],
+  unknown_uav: ['https://image2url.com/r2/default/images/1770034055392-bc372247-fbcc-4a03-8bc6-58eb021f13a3.png', 24],
+  molniya_uav: ['https://image2url.com/r2/default/images/1769865931930-f030be05-42e0-4bf3-b6f0-e3a6a30319d7.png', 28],
+  zala: ['https://image2url.com/r2/default/images/1769866607142-afcdd360-ecda-4262-b039-d4bb7969d62f.png', 27],
+  gerbera: ['https://image2url.com/r2/default/images/1769873035628-4f3813ed-c537-43ab-8ef6-166066f3f72f.png', 24],
+  orlan10: ['https://image2url.com/r2/default/images/1769951577213-f1ec5d62-1c46-49ec-a8c7-dc566fd3560d.png', 16],
+  geran2: ['https://image2url.com/r2/default/images/1769951597454-ae4251f1-69fc-482b-a4a5-71ffd356c514.png', 17],
+  x101: ['https://image2url.com/r2/default/images/1769819258646-298e5b0c-8c6c-4b97-a76f-d8a23787f129.png', 26],
+  kinzhal: ['https://image2url.com/r2/default/images/1769866797824-8cca767c-f89e-4b1b-b26a-7bca6f6a9ba4.png', 26],
+  iskander: ['https://image2url.com/r2/default/images/1769865857265-6f3cff5b-d796-44d2-ac25-059627b1a816.png', 26],
+  kab: ['https://image2url.com/r2/default/images/1769870791900-3d52f83c-5625-49d2-af80-25537e5970f5.png', 26],
+  tu95ms: ['https://image2url.com/r2/default/images/1769873099537-2e989e4a-4e8d-4036-a7d9-e3a14dbe49bf.png', 28],
+  mig31k: ['https://image2url.com/r2/default/images/1769951654301-930849ec-387b-4f4a-9aaa-7d6a7e1c0e37.png', 28],
+  su34: ['https://image2url.com/r2/default/images/1769870812595-347659e8-df22-4f45-8e49-9a6e2a4923b9.png', 28]
+};
+
+let placing = false, currentIcon = null, currentTypeName = '', tempMarker = null;
+let allMarkers = [], allShapes = [];
+
+function toggleGroup(id) {
+  document.querySelectorAll('.group').forEach(g => {
+    if (g.id !== id) g.style.display = 'none';
+  });
+  const el = document.getElementById(id);
+  el.style.display = el.style.display === 'flex' ? 'none' : 'flex';
+}
+
+document.getElementById('togglePanelTop').onclick = () => {
+  const panel = document.getElementById('controlsPanel');
+  const logo = document.getElementById('logoText');
+  const isHidden = panel.style.display === 'none';
+  panel.style.display = isHidden ? 'flex' : 'none';
+  logo.style.opacity = isHidden ? 1 : 0;
+};
+
+document.querySelectorAll('.sub-btn').forEach(btn => {
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    currentTypeName = btn.dataset.type;
+    const [url, size] = icons[currentTypeName];
+    currentIcon = L.icon({ iconUrl: url, iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
+    placing = true;
+    tempMarker = null;
+  };
+});
+
+document.getElementById('clearBtn').onclick = () => {
+  allMarkers.forEach(m => map.removeLayer(m));
+  allShapes.forEach(s => map.removeLayer(s));
+  allMarkers = [];
+  allShapes = [];
+};
+
+map.on('click', e => {
+  if (!placing) return;
+
+  if (currentTypeName === 'iskander') {
+    let radiusKm = parseFloat(prompt("Радіус дії (км):", "50"));
+    if (!isNaN(radiusKm)) {
+      const m = L.marker(e.latlng, { icon: currentIcon }).addTo(map);
+      const c = L.circle(e.latlng, { radius: radiusKm * 1000, color: 'red', fillOpacity: 0.2 }).addTo(map);
+      allMarkers.push(m);
+      allShapes.push(c);
+    }
+    placing = false;
+  } 
+  else {
+    // Логіка повороту: перший клік ставить, другий — направляє
+    if (!tempMarker) {
+      tempMarker = L.marker(e.latlng, { icon: currentIcon, rotationAngle: 0, rotationOrigin: 'center' }).addTo(map);
+      allMarkers.push(tempMarker);
+    } else {
+      const startPos = tempMarker.getLatLng();
+      const endPos = e.latlng;
+      const angle = Math.atan2(endPos.lng - startPos.lng, endPos.lat - startPos.lat) * 180 / Math.PI;
+      tempMarker.setRotationAngle(angle);
+      tempMarker = null;
+      placing = false;
+    }
+  }
+});
+</script>
+</body>
+</html>
+
